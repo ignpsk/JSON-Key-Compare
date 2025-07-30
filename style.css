@@ -65,6 +65,10 @@ dialog {
   width: 90%;
   max-width: 600px;
   font-size: 0.95rem;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 dialog::backdrop {
@@ -74,6 +78,8 @@ dialog::backdrop {
 #resultText {
   white-space: pre-wrap;
   word-wrap: break-word;
+  max-height: calc(1.2em * 30);
+  overflow-y: auto;
 }
 
 
@@ -81,6 +87,18 @@ dialog::backdrop {
   margin-bottom: 0.5rem;
   font-family: monospace;
   color: #A7A7A7; /* neutral twilight gray */
+}
+
+.result.missing {
+  color: #f44747; /* vscode red */
+}
+
+.result.success {
+  color: #6A9955; /* vscode green */
+}
+
+.result.mismatched {
+  color: #ffa500; /* orange */
 }
 
 
