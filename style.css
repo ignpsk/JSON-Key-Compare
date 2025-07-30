@@ -76,26 +76,14 @@ dialog::backdrop {
   word-wrap: break-word;
 }
 
+
 .result {
   margin-bottom: 0.5rem;
   font-family: monospace;
-}
-
-.missing {
-  color: #CF6A4C; /* match twilight red */
-}
-
-.mismatched {
-  color: #E9C062; /* match twilight yellow */
-}
-
-.moved {
-  color: #8F9D6A; /* match twilight green */
-}
-
-.success {
   color: #A7A7A7; /* neutral twilight gray */
 }
+
+
 
 .container label {
   margin-top: 1rem;

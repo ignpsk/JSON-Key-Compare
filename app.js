@@ -5,6 +5,15 @@ const targetEditor = ace.edit("targetEditor");
 targetEditor.session.setMode("ace/mode/json");
 targetEditor.setTheme("ace/theme/twilight");
 
+const resultDialog = document.getElementById("resultDialog");
+const resultText = document.getElementById("resultText");
+
+resultDialog.addEventListener('click', (e) => {
+  if (e.target === resultDialog) {
+    resultDialog.close();
+  }
+});
+
 function flattenJSON(obj, path = '') {
   let result = [];
   if (Array.isArray(obj)) {
@@ -30,8 +39,6 @@ function compareJSON() {
   const sourceText = sourceEditor.getValue();
   const targetText = targetEditor.getValue();
   const ignoreValues = document.getElementById("ignoreValues").checked;
-  const resultDialog = document.getElementById("resultDialog");
-  const resultText = document.getElementById("resultText");
 
   try {
     const source = JSON.parse(sourceText);
@@ -43,53 +50,36 @@ function compareJSON() {
     let resultHTML = '';
 
     if (ignoreValues) {
-      const tgtMap = new Map(tgtFlat.map(e => [e.path, e.value]));
+      const tgtSet = new Set(tgtFlat.map(e => e.path));
       let missing = [];
-      let mismatched = [];
 
-      for (const { path, value } of srcFlat) {
-        if (!tgtMap.has(path)) {
+      for (const { path } of srcFlat) {
+        if (!tgtSet.has(path)) {
           missing.push(`"${path}"`);
-        } else if (tgtMap.get(path) !== value) {
-          mismatched.push(`"${path}" expected ${value} but found ${tgtMap.get(path)}`);
         }
       }
 
       if (missing.length) {
-        resultHTML += formatList('Missing', missing, 'missing');
+        resultHTML += formatList('❌ Missing', missing, 'missing');
+      } else {
+        resultHTML = `<div class="result success">✅ All keys from source exist in target.</div>`;
       }
-      if (mismatched.length) {
-        resultHTML += formatList('Value mismatch', mismatched, 'mismatched');
-      }
-      if (!missing.length && !mismatched.length) resultHTML = `<div class="result success">✅ All keys from source exist in target.</div>`;
     } else {
-      const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
-      const tgtValueMap = new Map();
-      tgtFlat.forEach(e => {
-        if (!tgtValueMap.has(e.value)) tgtValueMap.set(e.value, []);
-        tgtValueMap.get(e.value).push(e.path);
-      });
-
+      const tgtSet = new Set(tgtFlat.map(e => e.path + '==' + e.value));
       let missing = [];
-      let moved = [];
 
       for (const { path, value } of srcFlat) {
         const key = path + '==' + value;
-        if (tgtMap.has(key)) continue;
-        else if (tgtValueMap.has(value)) {
-          moved.push(`"${path}" with value ${value} moved to → ${tgtValueMap.get(value).join(', ')}`);
-        } else {
+        if (!tgtSet.has(key)) {
           missing.push(`"${path}" with value ${value}`);
         }
       }
 
       if (missing.length) {
-        resultHTML += formatList('Missing', missing, 'missing');
+        resultHTML += formatList('❌ Missing', missing, 'missing');
+      } else {
+        resultHTML = `<div class="result success">✅ All key-value pairs from source exist in target.</div>`;
       }
-      if (moved.length) {
-        resultHTML += formatList('Possibly moved', moved, 'moved');
-      }
-      if (!missing.length && !moved.length) resultHTML = `<div class="result success">✅ All key-value pairs from source exist in target.</div>`;
     }
     resultText.innerHTML = resultHTML;
   } catch (e) {
