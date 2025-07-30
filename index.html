@@ -78,9 +78,21 @@
       background: rgba(0, 0, 0, 0.6);
     }
 
-    dialog pre {
+    #resultText {
       white-space: pre-wrap;
       word-wrap: break-word;
+    }
+
+    .missing {
+      color: #ff6b6b;
+    }
+
+    .mismatched {
+      color: #f0ad4e;
+    }
+
+    .moved {
+      color: #62c1ff;
     }
   </style>
   <script src="ace.js"></script>
@@ -100,7 +112,7 @@
     <button onclick="compareJSON()" aria-label="Compare JSON">Compare</button>
   </div>
   <dialog id="resultDialog" aria-modal="true">
-    <pre id="resultText"></pre>
+    <div id="resultText"></div>
     <form method="dialog">
       <button>Close</button>
     </form>
@@ -145,7 +157,7 @@
         const srcFlat = flattenJSON(source);
         const tgtFlat = flattenJSON(target);
 
-        let result = '';
+        let resultHTML = '';
 
         if (ignoreValues) {
           const tgtMap = new Map(tgtFlat.map(e => [e.path, e.value]));
@@ -160,9 +172,13 @@
             }
           }
 
-          if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
-          if (mismatched.length) result += `🔄 Value mismatch:\n- ${mismatched.join('\n- ')}\n\n`;
-          if (!missing.length && !mismatched.length) result = '✅ All keys from source exist in target.';
+          if (missing.length) {
+            resultHTML += `<div class="missing"><strong>Missing:</strong><ul><li>${missing.join('</li><li>')}</li></ul></div>`;
+          }
+          if (mismatched.length) {
+            resultHTML += `<div class="mismatched"><strong>Value mismatch:</strong><ul><li>${mismatched.join('</li><li>')}</li></ul></div>`;
+          }
+          if (!missing.length && !mismatched.length) resultHTML = '✅ All keys from source exist in target.';
         } else {
           const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
           const tgtValueMap = new Map();
@@ -184,13 +200,17 @@
             }
           }
 
-          if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
-          if (moved.length) result += `↪️ Possibly moved:\n- ${moved.join('\n- ')}\n\n`;
-          if (!missing.length && !moved.length) result = '✅ All key-value pairs from source exist in target.';
+          if (missing.length) {
+            resultHTML += `<div class="missing"><strong>Missing:</strong><ul><li>${missing.join('</li><li>')}</li></ul></div>`;
+          }
+          if (moved.length) {
+            resultHTML += `<div class="moved"><strong>Possibly moved:</strong><ul><li>${moved.join('</li><li>')}</li></ul></div>`;
+          }
+          if (!missing.length && !moved.length) resultHTML = '✅ All key-value pairs from source exist in target.';
         }
-        resultText.textContent = result;
+        resultText.innerHTML = resultHTML;
       } catch (e) {
-        resultText.textContent = "❗ Invalid JSON input.";
+        resultText.innerHTML = "❗ Invalid JSON input.";
       }
 
       resultDialog.showModal();
