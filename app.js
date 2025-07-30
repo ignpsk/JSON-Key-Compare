@@ -47,9 +47,9 @@ function formatMissing(items, includeValues) {
   const lines = [];
   for (const it of items) {
     if (includeValues && it.value !== undefined) {
-      lines.push(`✘ ${escapeHtml(it.path)} = ${escapeHtml(it.value)}`);
+      lines.push(`${escapeHtml(it.path)} = ${escapeHtml(it.value)}`);
     } else {
-      lines.push(`✘ ${escapeHtml(it.path)}`);
+      lines.push(`${escapeHtml(it.path)}`);
     }
   }
   return `<div class="result missing">❌ Missing:<br><pre>${lines.join('\n')}</pre></div>`;
