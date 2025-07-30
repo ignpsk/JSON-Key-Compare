@@ -83,6 +83,11 @@
       word-wrap: break-word;
     }
 
+    .result {
+      margin-bottom: 0.5rem;
+      font-family: monospace;
+    }
+
     .missing {
       color: #CF6A4C; /* match twilight red */
     }
@@ -93,6 +98,10 @@
 
     .moved {
       color: #8F9D6A; /* match twilight green */
+    }
+
+    .success {
+      color: #A7A7A7; /* neutral twilight gray */
     }
   </style>
   <script src="ace.js"></script>
@@ -143,10 +152,14 @@
       return result;
     }
 
+   function formatList(title, items, cls) {
+     return `<div class="result ${cls}"><strong>${title}:</strong><ul><li>${items.join('</li><li>')}</li></ul></div>`;
+   }
+
    function compareJSON() {
      const sourceText = sourceEditor.getValue();
      const targetText = targetEditor.getValue();
-      const ignoreValues = document.getElementById("ignoreValues").checked;
+     const ignoreValues = document.getElementById("ignoreValues").checked;
      const resultDialog = document.getElementById("resultDialog");
      const resultText = document.getElementById("resultText");
 
@@ -173,12 +186,12 @@
           }
 
           if (missing.length) {
-            resultHTML += `<div class="missing"><strong>Missing:</strong> ${missing.join(', ')}</div>`;
+            resultHTML += formatList('Missing', missing, 'missing');
           }
           if (mismatched.length) {
-            resultHTML += `<div class="mismatched"><strong>Value mismatch:</strong> ${mismatched.join(', ')}</div>`;
+            resultHTML += formatList('Value mismatch', mismatched, 'mismatched');
           }
-          if (!missing.length && !mismatched.length) resultHTML = '✅ All keys from source exist in target.';
+          if (!missing.length && !mismatched.length) resultHTML = `<div class="result success">✅ All keys from source exist in target.</div>`;
         } else {
           const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
           const tgtValueMap = new Map();
@@ -201,16 +214,16 @@
           }
 
           if (missing.length) {
-            resultHTML += `<div class="missing"><strong>Missing:</strong> ${missing.join(', ')}</div>`;
+            resultHTML += formatList('Missing', missing, 'missing');
           }
           if (moved.length) {
-            resultHTML += `<div class="moved"><strong>Possibly moved:</strong> ${moved.join(', ')}</div>`;
+            resultHTML += formatList('Possibly moved', moved, 'moved');
           }
-          if (!missing.length && !moved.length) resultHTML = '✅ All key-value pairs from source exist in target.';
+          if (!missing.length && !moved.length) resultHTML = `<div class="result success">✅ All key-value pairs from source exist in target.</div>`;
         }
         resultText.innerHTML = resultHTML;
       } catch (e) {
-        resultText.innerHTML = "❗ Invalid JSON input.";
+        resultText.innerHTML = `<div class="result mismatched">❗ Invalid JSON input.</div>`;
       }
 
       resultDialog.showModal();
