@@ -1,17 +1,16 @@
 body {
   background-color: #1e1e1e;
   color: #e0e0e0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Fira Code', monospace;
   margin: 0;
   padding: 2rem;
 }
 
 h1 {
   text-align: center;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #e0e0e0;
   margin-bottom: 2rem;
+  font-family: 'Fira Code', monospace;
+  color: #e0e0e0;
 }
 
 .container {
@@ -50,6 +49,7 @@ button {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-family: 'Fira Code', monospace;
 }
 
 button:hover {
