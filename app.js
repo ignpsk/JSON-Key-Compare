@@ -44,37 +44,15 @@ function escapeHtml(str) {
 }
 
 function formatMissing(items, includeValues) {
-  const groups = {};
-  for (const it of items) {
-    const idx = it.path.indexOf('.');
-    let group = '';
-    let field = it.path;
-    if (idx !== -1) {
-      group = it.path.slice(0, idx);
-      field = it.path.slice(idx + 1);
-    }
-    if (!groups[group]) groups[group] = [];
-    groups[group].push({ field, value: it.value });
-  }
-
   const lines = [];
-  for (const group of Object.keys(groups).sort()) {
-    const entries = groups[group];
-    const maxLen = Math.max(...entries.map(e => e.field.length));
-    if (group) {
-      lines.push(`❯ ${escapeHtml(group)}:`);
-    }
-    const indent = group ? '    ' : '';
-    for (const { field, value } of entries) {
-      const padded = field.padEnd(maxLen, ' ');
-      if (includeValues && value !== undefined) {
-        lines.push(`${indent}✘ ${escapeHtml(padded)} = ${escapeHtml(value)}`);
-      } else {
-        lines.push(`${indent}✘ ${escapeHtml(field)}`);
-      }
+  for (const it of items) {
+    if (includeValues && it.value !== undefined) {
+      lines.push(`✘ ${escapeHtml(it.path)} = ${escapeHtml(it.value)}`);
+    } else {
+      lines.push(`✘ ${escapeHtml(it.path)}`);
     }
   }
-  return `<div class="result missing"><pre>${lines.join('\n')}</pre></div>`;
+  return `<div class="result missing">❌ Missing:<br><pre>${lines.join('\n')}</pre></div>`;
 }
 
 function compareJSON() {
@@ -104,7 +82,7 @@ function compareJSON() {
       if (missing.length) {
         resultHTML += formatMissing(missing, false);
       } else {
-        resultHTML = `<div class="result success">✅ All keys from source exist in target.</div>`;
+        resultHTML = `<div class="result success">✅ All keys from source exist in target</div>`;
       }
     } else {
       const tgtSet = new Set(tgtFlat.map(e => e.path + '==' + e.value));
@@ -120,12 +98,12 @@ function compareJSON() {
       if (missing.length) {
         resultHTML += formatMissing(missing, true);
       } else {
-        resultHTML = `<div class="result success">✅ All key-value pairs from source exist in target.</div>`;
+        resultHTML = `<div class="result success">✅ All key-value pairs from source exist in target</div>`;
       }
     }
     resultText.innerHTML = resultHTML;
   } catch (e) {
-    resultText.innerHTML = `<div class="result mismatched">❗ Invalid JSON input.</div>`;
+    resultText.innerHTML = `<div class="result mismatched">❗ Invalid JSON input</div>`;
   }
 
   resultDialog.showModal();

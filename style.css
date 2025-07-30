@@ -10,7 +10,7 @@ h1 {
   text-align: center;
   font-size: 2rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #e0e0e0;
   margin-bottom: 2rem;
 }
 
@@ -37,14 +37,14 @@ h1 {
 
 .ace_editor {
   background-color: #2a2a2a;
-  color: #ffffff;
+  color: #e0e0e0;
 }
 
 button {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
   background-color: #2A2A2A;
-  color: #ffffff;
+  color: #e0e0e0;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -108,15 +108,15 @@ dialog::backdrop {
 }
 
 .result.missing {
-  color: #f44747; /* vscode red */
+  color: #e0e0e0; /* vscode red */
 }
 
 .result.success {
-  color: #6A9955; /* vscode green */
+  color: #e0e0e0; /* vscode green */
 }
 
 .result.mismatched {
-  color: #ffa500; /* orange */
+  color: #e0e0e0; /* orange */
 }
 
 
