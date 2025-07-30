@@ -84,15 +84,15 @@
     }
 
     .missing {
-      color: #ff6b6b;
+      color: #CF6A4C; /* match twilight red */
     }
 
     .mismatched {
-      color: #f0ad4e;
+      color: #E9C062; /* match twilight yellow */
     }
 
     .moved {
-      color: #62c1ff;
+      color: #8F9D6A; /* match twilight green */
     }
   </style>
   <script src="ace.js"></script>
@@ -173,10 +173,10 @@
           }
 
           if (missing.length) {
-            resultHTML += `<div class="missing"><strong>Missing:</strong><ul><li>${missing.join('</li><li>')}</li></ul></div>`;
+            resultHTML += `<div class="missing"><strong>Missing:</strong> ${missing.join(', ')}</div>`;
           }
           if (mismatched.length) {
-            resultHTML += `<div class="mismatched"><strong>Value mismatch:</strong><ul><li>${mismatched.join('</li><li>')}</li></ul></div>`;
+            resultHTML += `<div class="mismatched"><strong>Value mismatch:</strong> ${mismatched.join(', ')}</div>`;
           }
           if (!missing.length && !mismatched.length) resultHTML = '✅ All keys from source exist in target.';
         } else {
@@ -201,10 +201,10 @@
           }
 
           if (missing.length) {
-            resultHTML += `<div class="missing"><strong>Missing:</strong><ul><li>${missing.join('</li><li>')}</li></ul></div>`;
+            resultHTML += `<div class="missing"><strong>Missing:</strong> ${missing.join(', ')}</div>`;
           }
           if (moved.length) {
-            resultHTML += `<div class="moved"><strong>Possibly moved:</strong><ul><li>${moved.join('</li><li>')}</li></ul></div>`;
+            resultHTML += `<div class="moved"><strong>Possibly moved:</strong> ${moved.join(', ')}</div>`;
           }
           if (!missing.length && !moved.length) resultHTML = '✅ All key-value pairs from source exist in target.';
         }
