@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeyMatch</title>
   <style>
     body {
       background-color: #1e1e1e;
@@ -85,7 +86,7 @@
   </style>
 </head>
 <body>
-  <h1>JSON Key Compare</h1>
+  <h1>KeyMatch: JSON Structure Diff</h1>
   <div class="container">
     <div class="json-area">
       <textarea id="source" placeholder="Paste source JSON here..."></textarea>
@@ -151,15 +152,13 @@
         }
 
         let result = '';
-        if (missing.length) result += `Missing:
-- ${missing.join('\n- ')}\n\n`;
-        if (moved.length) result += `Possibly moved:
-- ${moved.join('\n- ')}\n\n`;
-        if (!missing.length && !moved.length) result = 'All key-value pairs from source exist in target.';
+        if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
+        if (moved.length) result += `↪️ Possibly moved:\n- ${moved.join('\n- ')}\n\n`;
+        if (!missing.length && !moved.length) result = '✅ All key-value pairs from source exist in target.';
 
         resultText.textContent = result;
       } catch (e) {
-        resultText.textContent = "Invalid JSON input.";
+        resultText.textContent = "❗ Invalid JSON input.";
       }
 
       resultDialog.showModal();
