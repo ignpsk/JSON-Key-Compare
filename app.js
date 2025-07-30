@@ -7,6 +7,11 @@ targetEditor.setTheme("ace/theme/twilight");
 
 const resultDialog = document.getElementById("resultDialog");
 const resultText = document.getElementById("resultText");
+const closeDialogBtn = document.getElementById("closeDialog");
+
+closeDialogBtn.addEventListener('click', () => {
+  resultDialog.close();
+});
 
 resultDialog.addEventListener('click', (e) => {
   if (e.target === resultDialog) {
