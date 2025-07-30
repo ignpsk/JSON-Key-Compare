@@ -92,6 +92,9 @@
       <textarea id="source" placeholder="Paste source JSON here..."></textarea>
       <textarea id="target" placeholder="Paste target JSON here..."></textarea>
     </div>
+    <label style="margin-top: 1rem;">
+      <input type="checkbox" id="ignoreValues" /> Ignore values
+    </label>
     <button onclick="compareJSON()">Compare</button>
   </div>
   <dialog id="resultDialog">
@@ -118,11 +121,12 @@
       return result;
     }
 
-    function compareJSON() {
-      const sourceText = document.getElementById("source").value;
-      const targetText = document.getElementById("target").value;
-      const resultDialog = document.getElementById("resultDialog");
-      const resultText = document.getElementById("resultText");
+   function compareJSON() {
+     const sourceText = document.getElementById("source").value;
+     const targetText = document.getElementById("target").value;
+      const ignoreValues = document.getElementById("ignoreValues").checked;
+     const resultDialog = document.getElementById("resultDialog");
+     const resultText = document.getElementById("resultText");
 
       try {
         const source = JSON.parse(sourceText);
@@ -131,31 +135,49 @@
         const srcFlat = flattenJSON(source);
         const tgtFlat = flattenJSON(target);
 
-        const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
-        const tgtValueMap = new Map();
-        tgtFlat.forEach(e => {
-          if (!tgtValueMap.has(e.value)) tgtValueMap.set(e.value, []);
-          tgtValueMap.get(e.value).push(e.path);
-        });
-
-        let missing = [];
-        let moved = [];
-
-        for (const { path, value } of srcFlat) {
-          const key = path + '==' + value;
-          if (tgtMap.has(key)) continue;
-          else if (tgtValueMap.has(value)) {
-            moved.push(`"${path}" with value ${value} moved to → ${tgtValueMap.get(value).join(', ')}`);
-          } else {
-            missing.push(`"${path}" with value ${value}`);
-          }
-        }
-
         let result = '';
-        if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
-        if (moved.length) result += `↪️ Possibly moved:\n- ${moved.join('\n- ')}\n\n`;
-        if (!missing.length && !moved.length) result = '✅ All key-value pairs from source exist in target.';
 
+        if (ignoreValues) {
+          const tgtMap = new Map(tgtFlat.map(e => [e.path, e.value]));
+          let missing = [];
+          let mismatched = [];
+
+          for (const { path, value } of srcFlat) {
+            if (!tgtMap.has(path)) {
+              missing.push(`"${path}"`);
+            } else if (tgtMap.get(path) !== value) {
+              mismatched.push(`"${path}" expected ${value} but found ${tgtMap.get(path)}`);
+            }
+          }
+
+          if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
+          if (mismatched.length) result += `🔄 Value mismatch:\n- ${mismatched.join('\n- ')}\n\n`;
+          if (!missing.length && !mismatched.length) result = '✅ All keys from source exist in target.';
+        } else {
+          const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
+          const tgtValueMap = new Map();
+          tgtFlat.forEach(e => {
+            if (!tgtValueMap.has(e.value)) tgtValueMap.set(e.value, []);
+            tgtValueMap.get(e.value).push(e.path);
+          });
+
+          let missing = [];
+          let moved = [];
+
+          for (const { path, value } of srcFlat) {
+            const key = path + '==' + value;
+            if (tgtMap.has(key)) continue;
+            else if (tgtValueMap.has(value)) {
+              moved.push(`"${path}" with value ${value} moved to → ${tgtValueMap.get(value).join(', ')}`);
+            } else {
+              missing.push(`"${path}" with value ${value}`);
+            }
+          }
+
+          if (missing.length) result += `❌ Missing:\n- ${missing.join('\n- ')}\n\n`;
+          if (moved.length) result += `↪️ Possibly moved:\n- ${moved.join('\n- ')}\n\n`;
+          if (!missing.length && !moved.length) result = '✅ All key-value pairs from source exist in target.';
+        }
         resultText.textContent = result;
       } catch (e) {
         resultText.textContent = "❗ Invalid JSON input.";
