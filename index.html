@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .json-area {
+      display: flex;
+      width: 100%;
+      gap: 1rem;
+    }
+
+    textarea {
+      flex: 1;
+      height: 300px;
+      background-color: #2a2a2a;
+      color: #ffffff;
+      border: 1px solid #444;
+      padding: 1rem;
+      font-size: 0.9rem;
+      font-family: monospace;
+      border-radius: 6px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: #007acc;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #005f99;
+    }
+
+    dialog {
+      background-color: #2a2a2a;
+      border: none;
+      border-radius: 6px;
+      padding: 1.5rem;
+      color: #e0e0e0;
+      width: 90%;
+      max-width: 600px;
+      font-size: 0.95rem;
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    dialog pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>JSON Key Compare</h1>
+  <div class="container">
+    <div class="json-area">
+      <textarea id="source" placeholder="Paste source JSON here..."></textarea>
+      <textarea id="target" placeholder="Paste target JSON here..."></textarea>
+    </div>
+    <button onclick="compareJSON()">Compare</button>
+  </div>
+  <dialog id="resultDialog">
+    <pre id="resultText"></pre>
+    <form method="dialog">
+      <button>Close</button>
+    </form>
+  </dialog>
+  <script>
+    function flattenJSON(obj, path = '') {
+      let result = [];
+      if (Array.isArray(obj)) {
+        obj.forEach((item, index) => {
+          result.push(...flattenJSON(item, `${path}[${index}]`));
+        });
+      } else if (obj !== null && typeof obj === 'object') {
+        for (let key in obj) {
+          if (!obj.hasOwnProperty(key)) continue;
+          result.push(...flattenJSON(obj[key], path ? `${path}.${key}` : key));
+        }
+      } else {
+        result.push({ path, value: JSON.stringify(obj) });
+      }
+      return result;
+    }
+
+    function compareJSON() {
+      const sourceText = document.getElementById("source").value;
+      const targetText = document.getElementById("target").value;
+      const resultDialog = document.getElementById("resultDialog");
+      const resultText = document.getElementById("resultText");
+
+      try {
+        const source = JSON.parse(sourceText);
+        const target = JSON.parse(targetText);
+
+        const srcFlat = flattenJSON(source);
+        const tgtFlat = flattenJSON(target);
+
+        const tgtMap = new Map(tgtFlat.map(e => [e.path + '==' + e.value, e.path]));
+        const tgtValueMap = new Map();
+        tgtFlat.forEach(e => {
+          if (!tgtValueMap.has(e.value)) tgtValueMap.set(e.value, []);
+          tgtValueMap.get(e.value).push(e.path);
+        });
+
+        let missing = [];
+        let moved = [];
+
+        for (const { path, value } of srcFlat) {
+          const key = path + '==' + value;
+          if (tgtMap.has(key)) continue;
+          else if (tgtValueMap.has(value)) {
+            moved.push(`"${path}" with value ${value} moved to → ${tgtValueMap.get(value).join(', ')}`);
+          } else {
+            missing.push(`"${path}" with value ${value}`);
+          }
+        }
+
+        let result = '';
+        if (missing.length) result += `Missing:
+- ${missing.join('\n- ')}\n\n`;
+        if (moved.length) result += `Possibly moved:
+- ${moved.join('\n- ')}\n\n`;
+        if (!missing.length && !moved.length) result = 'All key-value pairs from source exist in target.';
+
+        resultText.textContent = result;
+      } catch (e) {
+        resultText.textContent = "Invalid JSON input.";
+      }
+
+      resultDialog.showModal();
+    }
+  </script>
+</body>
+</html>
